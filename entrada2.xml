@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diccionario>
+    <sentimientos_positivos>
+        <palabra> Feliz </palabra>
+        <palabra> Bueno </palabra>
+        <palabra> Excelente </palabra>
+        <palabra> Bienvenidos </palabra>
+        <palabra> COOL </palabra>
+        <palabra> Satisfecho </palabra>
+    </sentimientos_positivos>
+    <sentimientos_negativos>
+        <palabra> Enojo </palabra>
+        <palabra> Insatisfactorio </palabra>
+        <palabra> Feo </palabra>
+        <palabra> Triste </palabra>
+        <palabra> Decepcionado </palabra>
+        <palabra> Pesimo </palabra>
+    </sentimientos_negativos>
+</diccionario>

@@ -1,0 +1,10 @@
+- lexico:
+    Hash -> #hash#
+    menciones -> @
+
+- emocion:
+    Positivo
+    Negativo
+    Neutro
+
+    
