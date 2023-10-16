@@ -41,6 +41,7 @@ def Xml_tweets():
             text = text.replace('\n',' ')
             text = text.replace('\t',' ')
             newtweet = tweet(fecha,text)
+            Analizador_Lexico(newtweet.txt,newtweet.Hash,newtweet.menciones)
             mensajes.append(newtweet)
         return jsonify({'xml':request.method})
     except:
@@ -66,10 +67,10 @@ def Xml_Palabras():
 @app.route('/tweets')
 def tweets():
     if len(mensajes) > 0:
-        for tweet in mensajes:
-            tweet_J = {'fecha':tweet.Date,'texto':tweet.txt}
-            tweet_Json.append(tweet_J)
-        return jsonify(tweet_Json)
+        # for tweet in mensajes:
+        #     tweet_J = {'fecha':tweet.Date,'texto':tweet.txt}
+        #     tweet_Json.append(tweet_J)
+        return jsonify({'tweets':[tweet.__dict__ for tweet in mensajes]})
     else:
         return jsonify({'info':'lista vacia'})
     
