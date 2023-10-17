@@ -54,6 +54,26 @@ def ArmarHash(cadena):
         pos+=1
     return None, None
 
-# Analizador_Lexico('#info# hola @juan @Abirl y @paula bienvenidos a # @usacenlinea #SoyUSAC# #Ingenieria# @juanj098 #juanjo#')
-# print(usuarios)
-# print(hash)
+
+def Analisis_Emocion(cadena,diccionario):
+    palPositivas = 0
+    palNegativas = 0
+    cadena = cadena.split(' ')
+    for key,emociones in diccionario.items():
+            for emocion in emociones:
+                emocion = emocion.strip()
+                for palabra in cadena:
+                    if palabra.lower() == emocion.lower() and key == 'Positivas':
+                        palPositivas+=1
+                    elif palabra.lower() == emocion.lower() and key == 'Negativas':
+                        palNegativas+=1
+    if palPositivas > palNegativas:
+        return f'Positivo'
+    elif palNegativas > palPositivas:
+        return f'Negativo'
+    elif palNegativas == palPositivas:
+        return f'Neutro'
+
+# diccionario_palabras = {'Negativas': ['enojo','feo','triste','pesimo','decepcionado','insatisfecho'],'Positivas': ['feliz','bueno','excelente','bienvenidos','cool','satisfecho']}
+# emocion = Analisis_Emocion('@Juanj098 Feliz anio #Happy#',diccionario_palabras)
+# print(emocion)

@@ -1,14 +1,17 @@
 from flask import Flask,jsonify,request
 import xml.etree.ElementTree as ET
 from flask_cors import CORS
-from analizadores import Analizador_Lexico
-
+from analizadores import Analizador_Lexico, Analisis_Emocion
+import re   
+from datetime import datetime 
 
 from mensaje import tweet
 
 mensajes = []
 tweet_Json = []
 emos_Json = []
+twets =[]
+
 diccionario_palabras = {'Negativas': [],'Positivas': []}
 
 def Analizador_Emo(text):
@@ -26,7 +29,8 @@ def ping():
 def Clear():
     mensajes.clear()
     tweet_Json.clear()
-    diccionario_palabras.clear()
+    diccionario_palabras['Negativas'].clear()
+    diccionario_palabras['Positivas'].clear()
     return jsonify({'info':'Listas vacias'})
 
 @app.route('/Xml_tweets', methods =['POST'])
@@ -38,14 +42,18 @@ def Xml_tweets():
         for mensaje in root.findall('MENSAJE'):
             fecha = mensaje.find('FECHA').text
             text = mensaje.find('TEXTO').text
-            text = text.replace('\n',' ')
-            text = text.replace('\t',' ')
+            text = text.strip()
             newtweet = tweet(fecha,text)
             Analizador_Lexico(newtweet.txt,newtweet.Hash,newtweet.menciones)
+            if len(diccionario_palabras['Positivas']) > 0 and len(diccionario_palabras['Negativas'])>0:
+                newtweet.emocion = Analisis_Emocion(newtweet.txt,diccionario_palabras)
+            else:
+                pass
             mensajes.append(newtweet)
+            
         return jsonify({'xml':request.method})
-    except:
-        return jsonify({'error':'error'})
+    except Exception as e:
+        return jsonify({'error':str(e)})
 
 @app.route('/Xml_Palabras', methods = ['POST'])
 def Xml_Palabras():
@@ -60,16 +68,16 @@ def Xml_Palabras():
             for palabra in Negativos.findall('palabra'):
                 Palabra = palabra.text
                 diccionario_palabras['Negativas'].append(Palabra)
+        if len(mensajes) > 0:
+            for tweet in mensajes:
+                tweet.emocion = Analisis_Emocion(tweet.txt,diccionario_palabras)
         return jsonify({'info':'registro exitoso'})
-    except:
-        return jsonify({'error':'error'})
+    except Exception as e:
+        return jsonify({'error': e})
 
 @app.route('/tweets')
 def tweets():
     if len(mensajes) > 0:
-        # for tweet in mensajes:
-        #     tweet_J = {'fecha':tweet.Date,'texto':tweet.txt}
-        #     tweet_Json.append(tweet_J)
         return jsonify({'tweets':[tweet.__dict__ for tweet in mensajes]})
     else:
         return jsonify({'info':'lista vacia'})
@@ -92,6 +100,35 @@ def Analizar():
     else:
         return jsonify({'info':'lista vacia'})
     
-    
+@app.route('/menciones/<string:dateMin>_<string:dateMax>')
+def date(dateMin,dateMax):
+    try:
+        usuarios = []
+        twets.clear()
+        date = ''
+        regex = r'\d+\/\d+\/\d+'
+        dateMin = dateMin.replace('.','/')
+        dateMax = dateMax.replace('.','/')
+        try:
+            dateMin = datetime.strptime(dateMin,'%d/%m/%Y')
+            dateMax = datetime.strptime(dateMax,'%d/%m/%Y')
+        except:
+            return jsonify({'mensaje':'fechas no permitidas'})
+        
+        if len(mensajes) > 0:
+            for tweet in mensajes:
+                date = re.search(regex,tweet.Date).group()
+                date =datetime.strptime(date,'%d/%m/%Y')
+                if dateMin <= date  and date <= dateMax:
+                    twets.append(tweet)
+                for tw in twets:
+                    for usuario in tw.menciones:
+                        print(usuario)
+            return jsonify({'dateTweet':[resp.__dict__ for resp in twets]})
+        else:
+            return jsonify({'info':'lista vacia'})
+    except Exception as e:
+        return jsonify({'error':str(e)})
+
 if __name__ == '__main__':
     app.run(debug = True,port = 4000)

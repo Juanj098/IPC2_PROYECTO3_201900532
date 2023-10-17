@@ -4,6 +4,7 @@ class tweet:
         self.txt  = txt
         self.menciones = []
         self.Hash = []
+        self.emocion = ''
 
 
 class Palabra:
@@ -11,3 +12,8 @@ class Palabra:
         self.palabra = palabra
         self.sentimiento = emocion
 
+
+class User:
+    def __init__(self,user,menciones) -> None:
+        self.user = user
+        self.menciones = int(menciones)
