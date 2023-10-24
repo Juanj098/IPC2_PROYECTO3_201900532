@@ -4,11 +4,13 @@ from flask_cors import CORS
 from analizadores import Analizador_Lexico, Analisis_Emocion
 import re   
 from datetime import datetime 
+import xml.dom.minidom
 
-from mensaje import tweet,User,Hashtags,MencionesFecha,HashtagsFecha,Emociones
+from mensaje import tweet,User,Hashtags,MencionesFecha,HashtagsFecha,Emociones,resumenTweet,resumenEmociones
 
 HFecha = []
 EFecha = []
+resumenTw = []
 MFecha = []
 usuarios = []
 Hashs = []
@@ -316,7 +318,74 @@ def Emos(fechaInicial,fechaMaxima):
     
 @app.route('/resumenTweets', methods = ['GET'])
 def resTweets():
-    return jsonify({'info':'Xml_generando...'})
+    resumenTw.clear()
+    tempMensajes = []
+    regex = r'\d+\/\d+\/\d+'
+    if len(mensajes) > 0:
+        for mensaje in mensajes:
+            temp_exist = False
+            date = mensaje.Date
+            date = re.search(regex,date).group()
+            for temporal in tempMensajes:
+                if temporal.date == date:
+                    temp_exist = True
+                    break
+            if not temp_exist:
+                newResumen = resumenTweet(date)
+                tempMensajes.append(newResumen)
+        
+        for mensaje in mensajes:
+            date = mensaje.Date
+            date = re.search(regex,date).group()
+
+            for temporal in tempMensajes:
+                if temporal.date == date:
+                    temporal.recibidos+=1
+                    temporal.users += len(mensaje.menciones)
+                    temporal.hash += len(mensaje.Hash)
+
+        root = ET.Element('MENSAJES_RECIBIDOS')
+        for temporal in tempMensajes:
+            time = ET.SubElement(root,'TIEMPO')
+            fecha = ET.SubElement(time,'FECHA')
+            fecha.text = temporal.date
+            msj = ET.SubElement(time,'MSJ_RECIBIDOS')
+            msj.text = str(temporal.recibidos)
+            users = ET.SubElement(time,'USR_MENCIONADOS')
+            users.text = str(temporal.users)
+            hash = ET.SubElement(time,'HASH_INCLUIDOS')
+            hash.text = str(temporal.hash)
+        root = ET.tostring(root,encoding='utf-8')
+        root = xml.dom.minidom.parseString(root).toprettyxml(indent="   ")
+        return jsonify({'info':root})
+    else:
+        return jsonify({'info':'ingrese documento de mensajes'})
+
+@app.route('/resumenEmociones', methods = ['GET'])
+def resumenEmos():
+    if len(diccionario_palabras['Positivas']) > 0 and len(diccionario_palabras['Negativas']) > 0:
+        newResumen = resumenEmociones()
+        for keys,value in diccionario_palabras.items():
+            if keys == 'Positivas':
+               newResumen.positivas += len(value)
+            if keys == 'Negativas':
+                newResumen.negativas += len(value)
+        
+        print(newResumen)
+        root = ET.Element('CONFIG_RECIBIDA')
+        positivas = ET.SubElement(root,'PALABRAS_POSITIVAS')
+        positivas.text = str(newResumen.positivas)
+        p_rechazadas = ET.SubElement(root,'PALABRAS_POSITIVAS_RECHAZADAS')
+        p_rechazadas.text = str(newResumen.positivas_rechazadas)
+        negativas = ET.SubElement(root,'PALABRAS_NEGATIVAS')
+        negativas.text = str(newResumen.negativas)
+        n_rechazadas = ET.SubElement(root,'PALABRAS_NEGATIVAS_RECHAZADAS')
+        n_rechazadas.text = str(newResumen.negativas_rechazadas)
+        root = ET.tostring(root,encoding='utf-8')
+        root = xml.dom.minidom.parseString(root).toprettyxml(indent="   ")
+        return jsonify({'info':root})
+    else:
+        return jsonify({'info':'ingrese doc. XML emociones'}) 
 
 if __name__ == '__main__':
     app.run(debug = True,port = 4000)
