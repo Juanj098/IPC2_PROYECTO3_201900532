@@ -7,4 +7,29 @@
     Negativo
     Neutro
 
-    
+notas:
+    - revisar /menciones/<dateMin>_<dateMax> !
+    - revisar /Hashtags/<dateMin>_<dateMax>  !
+    - revisar /Emociones/<ateMin>_<dateMax>  !
+{
+    fecha:01/01/2023,
+    menciones:[
+        {
+            usuario: x,
+            menciones: ?
+        },
+        {
+            usuario: y,
+            menciones: ?
+        }
+    ]
+}
+
+emocion:
+--> fecha: d/m/y
+{
+    -> Positivo: ?
+    -> Negativo: ?
+    -> Neutro: ?
+}
+
