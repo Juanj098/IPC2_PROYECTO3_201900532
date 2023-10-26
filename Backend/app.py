@@ -5,6 +5,7 @@ from analizadores import Analizador_Lexico, Analisis_Emocion
 import re   
 from datetime import datetime 
 import xml.dom.minidom
+import base64
 
 from mensaje import tweet,User,Hashtags,MencionesFecha,HashtagsFecha,Emociones,resumenTweet,resumenEmociones
 
@@ -42,45 +43,53 @@ def Clear():
 
 @app.route('/Xml_tweets', methods =['POST'])
 def Xml_tweets():
-    xml = request.data
-    try:
-        root = ET.fromstring(xml)
-        ET.dump(root)
-        for mensaje in root.findall('MENSAJE'):
-            fecha = mensaje.find('FECHA').text
-            text = mensaje.find('TEXTO').text
-            text = text.strip()
-            newtweet = tweet(fecha,text)
-            Analizador_Lexico(newtweet.txt,newtweet.Hash,newtweet.menciones)
-            if len(diccionario_palabras['Positivas']) > 0 and len(diccionario_palabras['Negativas'])>0:
-                newtweet.emocion = Analisis_Emocion(newtweet.txt,diccionario_palabras)
-            else:
-                pass
-            mensajes.append(newtweet)
-            
-        return jsonify({'xml':request.method})
-    except Exception as e:
-        return jsonify({'error':str(e)})
+    if 'file' not in request.files:
+        return jsonify({'error':'intente enviar de nuevo el documento'})
+    file = request.files['file']
+    if file:
+        xml = file.read().decode('utf-8')
+        try:
+            root = ET.fromstring(xml)
+            for mensaje in root.findall('MENSAJE'):
+                fecha = mensaje.find('FECHA').text
+                text = mensaje.find('TEXTO').text
+                text = text.strip()
+                newtweet = tweet(fecha,text)
+                Analizador_Lexico(newtweet.txt,newtweet.Hash,newtweet.menciones)
+                if len(diccionario_palabras['Positivas']) > 0 and len(diccionario_palabras['Negativas'])>0:
+                    newtweet.emocion = Analisis_Emocion(newtweet.txt,diccionario_palabras)
+                mensajes.append(newtweet)            
+            return jsonify({'xml':'archivo xml procesado con exito..'})
+        except Exception as e:
+            return jsonify({'error':str(e)})
+    else:
+        return jsonify({'info':'no selecciono ningun archivo'})
 
 @app.route('/Xml_Palabras', methods = ['POST'])
 def Xml_Palabras():
-    xml = request.data
-    try:
-        root = ET.fromstring(xml)
-        for Positivos in root.findall('sentimientos_positivos'):
-            for palabra in Positivos.findall('palabra'):
-                Palabra = palabra.text
-                diccionario_palabras['Positivas'].append(Palabra)
-        for Negativos in root.findall('sentimientos_negativos'):
-            for palabra in Negativos.findall('palabra'):
-                Palabra = palabra.text
-                diccionario_palabras['Negativas'].append(Palabra)
-        if len(mensajes) > 0:
-            for tweet in mensajes:
-                tweet.emocion = Analisis_Emocion(tweet.txt,diccionario_palabras)
-        return jsonify({'info':'registro exitoso'})
-    except Exception as e:
-        return jsonify({'error': e})
+    if 'file' not in request.files:
+        return jsonify({'error':'intente enviar de nuevo el documento'})
+    file = request.files['file']
+    if file:
+        xml = file.read().decode('utf-8')
+        try:
+            root = ET.fromstring(xml)
+            for Positivos in root.findall('sentimientos_positivos'):
+                for palabra in Positivos.findall('palabra'):
+                    Palabra = palabra.text
+                    diccionario_palabras['Positivas'].append(Palabra)
+            for Negativos in root.findall('sentimientos_negativos'):
+                for palabra in Negativos.findall('palabra'):
+                    Palabra = palabra.text
+                    diccionario_palabras['Negativas'].append(Palabra)
+            if len(mensajes) > 0:
+                for tweet in mensajes:
+                    tweet.emocion = Analisis_Emocion(tweet.txt,diccionario_palabras)
+            return jsonify({'info':'archivo xml procesado con exito...'})
+        except Exception as e:
+            return jsonify({'error': e})
+    else:
+        return jsonify({'info':'no selecciono ningun archivo'})
 
 @app.route('/tweets')
 def tweets():
@@ -371,7 +380,6 @@ def resumenEmos():
             if keys == 'Negativas':
                 newResumen.negativas += len(value)
         
-        print(newResumen)
         root = ET.Element('CONFIG_RECIBIDA')
         positivas = ET.SubElement(root,'PALABRAS_POSITIVAS')
         positivas.text = str(newResumen.positivas)

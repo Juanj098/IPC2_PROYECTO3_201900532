@@ -1,8 +1,8 @@
 from django.urls import path
-
 from . import views
 
 urlpatterns =[
-    path("", views.index, name="index"),
-    path("<str:nameDoc>/", views.testXml, name = 'testXml')
+    path('sendTweetsyConfi/',views.sendTweetsyConfi,name='sendTweetsyConfi'),
+    path('resumenTweets/',views.resumenTweets, name='resumenTweets'),
+    path('resumenConfig/', views.resumenConfi, name='resumenConfi') 
 ]

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>PROYECTO NO. 3</h1>
+
+    <div class="xml_tweets">
+        <h2>Envio Xml Mensajes y Configuracion</h2>
+        <form action="POST" id="myform" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="file" id="file">
+            <button type="button" id="submitButton"> Enviar Archivo </button>
+        </form>
+    </div>
+
+    <div id="response">
+        <textarea name="responseTxt" id="responseTxt" cols="100" rows="50" readonly></textarea>
+        <button type="button" id="getResponse"> Archivo salida Tweets</button>
+        <button type="button" id="getConfi">Archivo salida Configuracion</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        $(document).ready(function(){
+            $("#submitButton").click(function(e){
+                e.preventDefault();
+                let form=new FormData()
+                form.append('data',$("#inputData").val())
+                form.append('file',$("#file")[0].files[0])
+                let csrfToken = $("input[name='csrfmiddlewaretoken']").val()
+                form.append('csrfmiddlewaretoken',csrfToken)
+                $.ajax({
+                    type:'POST',
+                    url:'',
+                    data:form,
+                    processData:false,
+                    contentType:false,
+                    success:function(response){
+                        $('#response').html(response.message)
+                    },
+                    error:function(xhr,status,error){
+                        $('#response').html('Error'+ error)
+                    }
+                });
+            });
+
+            $('#getResponse').click(function(){
+                $.get("/SendXml/resumenTweets",function(response){
+                    $("#responseTxt").removeAttr("readonly")
+                    $("#responseTxt").val(response.info)
+                    $("#responseTxt").prop("disabled", true);
+                })
+            })
+
+            $('#getConfi').click(function(){
+                $.get("/SendXml/resumenConfig",function(response){
+                    $("#responseTxt").removeAttr("readonly")
+                    $("#responseTxt").val(response.info)
+                    $("#responseTxt").prop("disabled", true);
+                })
+            })
+        })
+
+
+    </script>
+</body>
+</html>
