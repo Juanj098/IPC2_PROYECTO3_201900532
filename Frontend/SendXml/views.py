@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 import xml.etree.ElementTree as ET
 from django.http import HttpResponse, JsonResponse
 import requests
+from datetime import datetime
 # Create your views here.
 
 def sendTweetsyConfi(request):
@@ -25,7 +26,7 @@ def sendTweetsyConfi(request):
             print(f'solicitud exitosa: {response.status_code}')
             return JsonResponse(response_data)
         except Exception as e:
-            return HttpResponse(str(e), status = 5000)
+            return HttpResponse(str(e), status = 500)
     return render(request, 'index.html')
 
 def resumenTweets(request):
@@ -36,7 +37,7 @@ def resumenTweets(request):
         response_data = response.json()
         return JsonResponse(response_data)
     except Exception as e:
-        return HttpResponse(str(e), status = 5000)
+        return HttpResponse(str(e), status = 500)
 
 def resumenConfi(request):
     try:
@@ -46,4 +47,31 @@ def resumenConfi(request):
         print(f'solicitud exitosa: **{response.status_code}')
         return JsonResponse(response_data)
     except Exception as e:
-        return HttpResponse(str(e), status = 5000)
+        return HttpResponse(str(e), status = 500)
+
+def Hashtags(request,dateMin,dateMax):
+    try:
+        dateMin = dateMin.split('-')
+        dateMin = f'{dateMin[2]}.{dateMin[1]}.{dateMin[0]}'
+        dateMax = dateMax.split('-')
+        dateMax = f'{dateMax[2]}.{dateMax[1]}.{dateMax[0]}'
+        response = requests.get(f'http://127.0.0.1:4000/Hashtags/{dateMin}_{dateMax}')
+        response.raise_for_status()
+        response_data = response.json()
+        print(f'solicitud exitosa: {response.status_code}')
+        return JsonResponse(response_data)
+    except Exception as e:
+        return HttpResponse(str(e), status = 500)
+
+def Users(request, dateMin,dateMax):
+    try:
+        response_data ={
+            'dateMin':dateMin,
+            'dateMax':dateMax
+        }
+        return JsonResponse(response_data)
+    except Exception as e:
+        return HttpResponse(str(e),status = 500)
+
+def emociones(request):
+    pass

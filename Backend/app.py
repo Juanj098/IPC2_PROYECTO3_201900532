@@ -20,7 +20,7 @@ tweet_Json = []
 emos_Json = []
 twets =[]
 
-diccionario_palabras = {'Negativas': [],'Positivas': []}
+diccionario_palabras = {'Negativas': [],'Positivas': [],'rechazadas_P':[], 'rechazadas_N':[]}
 
 def sort_list(list):
     pass
@@ -39,6 +39,22 @@ def Clear():
     tweet_Json.clear()
     diccionario_palabras['Negativas'].clear()
     diccionario_palabras['Positivas'].clear()
+    diccionario_palabras['rechazadas_P'].clear()
+    diccionario_palabras['rechazadas_N'].clear()
+
+    path1 = 'DB_tweets.xml'
+    tree = ET.parse(path1)
+    root1 = tree.getroot()
+    for elm in root1.findall('MENSAJE'):
+        root1.remove(elm)
+
+    path2 = 'DB_Emociones.xml'
+    tree = ET.parse(path2)
+    root2 = tree.getroot()
+    for elm in root2.findall('sentimientos_positivos'):
+        root2.remove(elm)
+    for elm in root2.findall('sentimientos_negativos'):
+        root2.remove(elm)
     return jsonify({'info':'Listas vacias'})
 
 @app.route('/Xml_tweets', methods =['POST'])
@@ -47,9 +63,9 @@ def Xml_tweets():
         return jsonify({'error':'intente enviar de nuevo el documento'})
     file = request.files['file']
     if file:
-        xml = file.read().decode('utf-8')
+        xmlDoc = file.read().decode('utf-8')
         try:
-            root = ET.fromstring(xml)
+            root = ET.fromstring(xmlDoc)
             for mensaje in root.findall('MENSAJE'):
                 fecha = mensaje.find('FECHA').text
                 text = mensaje.find('TEXTO').text
@@ -58,7 +74,29 @@ def Xml_tweets():
                 Analizador_Lexico(newtweet.txt,newtweet.Hash,newtweet.menciones)
                 if len(diccionario_palabras['Positivas']) > 0 and len(diccionario_palabras['Negativas'])>0:
                     newtweet.emocion = Analisis_Emocion(newtweet.txt,diccionario_palabras)
-                mensajes.append(newtweet)            
+                mensajes.append(newtweet)
+            
+            path = 'DB_tweets.xml'
+            regex = r'\d+\/\d+\/\d+'
+            tree = ET.parse(path)
+            root = tree.getroot()
+            for elm in root.findall('MENSAJE'):
+                root.remove(elm)
+            
+            for mensaje in mensajes:
+                message = ET.Element('MENSAJE')
+                date = ET.SubElement(message,'FECHA')
+                date.text = re.search(regex,mensaje.Date).group()
+                txt = ET.SubElement(message,'TEXTO')
+                txt.text = mensaje.txt
+                root.append(message)
+
+            root = ET.tostring(root,encoding='utf-8')
+            root = xml.dom.minidom.parseString(root)
+            root = root.toprettyxml(indent='    ')
+            with open('DB_tweets.xml','w',encoding='utf-8') as xmlFile:
+                xmlFile.write(root)
+
             return jsonify({'xml':'archivo xml procesado con exito..'})
         except Exception as e:
             return jsonify({'error':str(e)})
@@ -71,9 +109,9 @@ def Xml_Palabras():
         return jsonify({'error':'intente enviar de nuevo el documento'})
     file = request.files['file']
     if file:
-        xml = file.read().decode('utf-8')
+        xmlD = file.read().decode('utf-8')
         try:
-            root = ET.fromstring(xml)
+            root = ET.fromstring(xmlD)
             for Positivos in root.findall('sentimientos_positivos'):
                 for palabra in Positivos.findall('palabra'):
                     Palabra = palabra.text
@@ -85,6 +123,35 @@ def Xml_Palabras():
             if len(mensajes) > 0:
                 for tweet in mensajes:
                     tweet.emocion = Analisis_Emocion(tweet.txt,diccionario_palabras)
+                
+            path = 'DB_Emociones.xml'
+            tree = ET.parse(path)
+            root = tree.getroot()
+            for elm in root.findall('sentimientos_positivos'):
+                root.remove(elm)
+            for elm in root.findall('sentimientos_negativos'):
+                root.remove(elm)
+
+            for key, valors in diccionario_palabras.items():
+                if key == 'Positivas':
+                    sP = ET.Element('sentimientos_positivos')
+                    for value in valors:
+                        palab = ET.SubElement(sP,'palabra')
+                        palab.text = value
+                    root.append(sP)
+                if key == 'Negativas':
+                    sN = ET.Element('sentimientos_negativos')
+                    for value in valors:
+                        palab = ET.SubElement(sN,'palabra')
+                        palab.text = value
+                    root.append(sN)
+
+            root = ET.tostring(root, encoding='utf-8')
+            root = xml.dom.minidom.parseString(root)
+            root = root.toprettyxml(indent='    ')
+            with open('DB_Emociones.xml','w',encoding='utf-8') as xmlFile:
+                xmlFile.write(root)
+
             return jsonify({'info':'archivo xml procesado con exito...'})
         except Exception as e:
             return jsonify({'error': e})
@@ -198,6 +265,7 @@ def Hash(dateMin,dateMax):
     try:    
         twets.clear()
         HFecha.clear()
+        fechas_Hashtag = []
         regex = r'\d+\/\d+\/\d+'
         dateMin = dateMin.replace('.','/')
         dateMax = dateMax.replace('.','/')
@@ -256,12 +324,20 @@ def Hash(dateMin,dateMax):
                         hf.Hashtags.append(has)
                 
             for hf in HFecha:
-                print(hf.date)
-                for hashtag in hf.Hashtags:
-                    print(hashtag)
+                newObj = {
+                    'fecha': hf.date,
+                    'Hashtags':[]
+                }
+                for has in hf.Hashtags:
+                    Hash_obj = {
+                        'Hashtag': has.Hashtag,
+                        'contador': str(has.contador)
+                    }
+                    newObj['Hashtags'].append(Hash_obj)                        
+                fechas_Hashtag.append(newObj)
+                
 
-
-            return jsonify({'Hashtags':'registrados'})
+            return jsonify({'info':fechas_Hashtag})
         else:
             return jsonify({'error':'lista vacia'})
         

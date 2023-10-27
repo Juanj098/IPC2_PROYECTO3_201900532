@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<DBdiccionario> 
+    <sentimientos_negativos>
+        <palabra> Enojo </palabra>
+        <palabra> Insatisfactorio </palabra>
+        <palabra> Feo </palabra>
+        <palabra> Triste </palabra>
+        <palabra> Decepcionado </palabra>
+        <palabra> Pesimo </palabra>
+        <palabra> mal </palabra>
+        <palabra> triste </palabra>
+        <palabra> molesto </palabra>
+        <palabra> decepcionado </palabra>
+        <palabra> enojo </palabra>
+    </sentimientos_negativos>
+    <sentimientos_positivos>
+        <palabra> Feliz </palabra>
+        <palabra> Bueno </palabra>
+        <palabra> Excelente </palabra>
+        <palabra> Bienvenidos </palabra>
+        <palabra> COOL </palabra>
+        <palabra> Satisfecho </palabra>
+        <palabra> emocionado </palabra>
+        <palabra> excelente </palabra>
+        <palabra> genial </palabra>
+        <palabra> alegre </palabra>
+    </sentimientos_positivos>
+</DBdiccionario>

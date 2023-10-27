@@ -22,7 +22,19 @@
         <button type="button" id="getResponse"> Archivo salida Tweets</button>
         <button type="button" id="getConfi">Archivo salida Configuracion</button>
     </div>
+    <div>
+        <h2> listas(Hashtags, Menciones y Emociones) </h2>
+        <div id="Calendars">
+            <input type="date" name="dateMin" id="dateMin">
+            <input type="date" name="dateMax" id="dateMax">
+        </div>
+        <div id="responseList">       
+        </div>
+        <button type="button" id="getHash">Hashtags</button>
+        <button type="button" id="getUsers">Menciones</button>
+        <button type="button">Emociones</button>
 
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <script>
@@ -63,6 +75,67 @@
                     $("#responseTxt").val(response.info)
                     $("#responseTxt").prop("disabled", true);
                 })
+            })
+
+            $('#getHash').click(function(){
+                let dateValueMin = $('#dateMin').val()
+                let dateValueMax = $('#dateMax').val() 
+                if(dateValueMin == null || dateValueMin == ''){
+                    alert('Ingrese fecha minima :s')
+                }else if(dateValueMax == null || dateValueMax == ''){
+                    alert('ingrese fecha maxima :s')
+                } else{
+                    url = `/SendXml/ListHash/${dateValueMin}_${dateValueMax}`
+                    $.get(url,function(response){
+                        if('info' in response){
+                            let padre = document.querySelector("#responseList")
+                            if (padre.hasChildNodes()){
+                                while(padre.firstChild){
+                                    padre.removeChild(padre.firstChild);
+                                }
+                            }
+                            for(let i=0;i<response.info.length;i++){
+                                let divList = document.querySelector("#responseList")
+                                let li = document.createElement('li')
+                                li.textContent = response.info[i].fecha
+                                li.classList.add('liFecha')
+                                divList.appendChild(li)
+                                console.log(response.info[i].fecha)
+                                let hash = response.info[i]
+                                for (let j=0;j< hash.Hashtags.length;j++){
+                                    console.log(hash.Hashtags[j])
+                                    let divUl = document.createElement('div')
+                                    divUl.classList.add('ulInfo')
+                                    let ulDataHash = document.createElement('ul')
+                                    ulDataHash.textContent =  hash.Hashtags[j].Hashtag
+                                    let ulDatacon = document.createElement('ul')
+                                    ulDatacon.textContent = hash.Hashtags[j].contador
+                                    divUl.appendChild(ulDataHash)
+                                    divUl.appendChild(ulDatacon)
+                                    li.appendChild(divUl)
+                                }
+                            }
+                        }else if('error' in response){
+                            alert('error' + response.error)
+                        }
+                    })
+                }
+
+            })
+
+            $('#getUsers').click(function(){
+                let dateValueMin = $('#dateMin').val()
+                let dateValueMax = $('#dateMax').val()
+                if( dateValueMin == "" || dateValueMin == null){
+                    alert('Ingrese Fecha minima de rango')
+                } else if (dateValueMax == "" || dateValueMax == null){
+                    alert('Ingrese Fecha maxima de rango')
+                }else{
+                    let url = `/SendXml/ListUsers/${dateValueMin}_${dateValueMax}`
+                    $.get(url,function(response){
+                        console.log(response.dateMax)
+                    })
+                }
             })
         })
 
