@@ -209,6 +209,7 @@ def date(dateMin,dateMax):
         # busca usuarios iguales o crea nuevos y cuenta las menciones
         if len(twets) > 0:
             usuarios.clear()
+            fechas_menciones = []
             cont = 1
             for tw in twets:
 
@@ -250,11 +251,19 @@ def date(dateMin,dateMax):
                         mf.menciones.append(usuario)
 
             for mf in MFecha:
-                print(mf.date)
-                for mencion in mf.menciones:
-                    print(mencion)
+                newObj = {
+                    'fecha':mf.date,
+                    'menciones':[]
+                }
+                for user in mf.menciones:
+                    mencion = {
+                        'user': user.user,
+                        'contador':str(user.menciones)
+                    }
+                    newObj['menciones'].append(mencion)
+                fechas_menciones.append(newObj)
 
-            return jsonify({'mensaje':'se contaron las menciones'})
+            return jsonify({'info':fechas_menciones})
         else:
             return jsonify({'info':'lista vacia'})
     except Exception as e:
@@ -348,6 +357,7 @@ def Hash(dateMin,dateMax):
 @app.route('/Emociones/<string:fechaInicial>_<string:fechaMaxima>' ,methods =['GET'])
 def Emos(fechaInicial,fechaMaxima):
     try:
+        fecha_E = []
         EFecha.clear()
         tempEmo = []
         regex = r'\d+\/\d+\/\d+'
@@ -355,7 +365,7 @@ def Emos(fechaInicial,fechaMaxima):
         fechaInicial = datetime.strptime(fechaInicial,'%d/%m/%Y')
         fechaMaxima = fechaMaxima.replace('.','/')
         fechaMaxima = datetime.strptime(fechaMaxima,'%d/%m/%Y')
-        if len(mensajes) > 0 and (len(diccionario_palabras['Positivas']) > 0 or len(diccionario_palabras['Negativas'] > 0)):
+        if len(mensajes) > 0 and (len(diccionario_palabras['Positivas']) > 0 or len(diccionario_palabras['Negativas']) > 0):
             for mensaje in mensajes:
                 date = mensaje.Date
                 date = re.search(regex,date).group()
@@ -392,8 +402,15 @@ def Emos(fechaInicial,fechaMaxima):
                                 pass
                 
                 for Ef in EFecha:
-                    print(Ef)
-                return jsonify({'info':'se procesaron emociones con exito :3'})
+                    newObj ={
+                        'fecha':Ef.date,
+                        'M_positivos':Ef.positivo,
+                        'M_negativos':Ef.negativo,
+                        'M_neutros':Ef.neutro
+                    }
+                    fecha_E.append(newObj)
+
+                return jsonify({'info':fecha_E})
             else:
                 return jsonify({'info':'no se encontraron mensajes en este rango de fecha'})
         else:

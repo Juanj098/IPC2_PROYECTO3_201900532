@@ -65,13 +65,38 @@ def Hashtags(request,dateMin,dateMax):
 
 def Users(request, dateMin,dateMax):
     try:
-        response_data ={
-            'dateMin':dateMin,
-            'dateMax':dateMax
-        }
+        dateMin = dateMin.split('-')
+        dateMin = f'{dateMin[2]}.{dateMin[1]}.{dateMin[0]}'
+        dateMax = dateMax.split('-')
+        dateMax = f'{dateMax[2]}.{dateMax[1]}.{dateMax[0]}'
+        response = requests.get(f'http://127.0.0.1:4000/menciones/{dateMin}_{dateMax}')
+        response.raise_for_status()
+        response_data = response.json()
+        print(f'solicitud exitosa: {response.status_code}')
         return JsonResponse(response_data)
     except Exception as e:
         return HttpResponse(str(e),status = 500)
 
-def emociones(request):
-    pass
+def emociones(request,dateMin,dateMax):
+    try:
+        dateMin = dateMin.split('-')
+        dateMin = f'{dateMin[2]}.{dateMin[1]}.{dateMin[0]}'
+        dateMax = dateMax.split('-')
+        dateMax = f'{dateMax[2]}.{dateMax[1]}.{dateMax[0]}'
+        response = requests.get(f'http://127.0.0.1:4000/Emociones/{dateMin}_{dateMax}')
+        response.raise_for_status()
+        response_data = response.json()
+        print(f'solicitud exitosa:{response.status_code}')
+        return JsonResponse(response_data)
+    except Exception as e:
+        return HttpResponse(str(e),status = 500)
+
+def ClearList(request):
+    try:
+        response = requests.get('http://127.0.0.1:4000/Clear')
+        response.raise_for_status()
+        response_data = response.json()
+        print(f'solicitud exitosa:{response.status_code}')
+        return JsonResponse(response_data)
+    except Exception as e:
+        return HttpResponse(str(e),status = 500)

@@ -1,41 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>IPC2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'index.css'%}">
 </head>
 <body>
-    <h1>PROYECTO NO. 3</h1>
-
+    <header class="header">
+        <img src="{% static 'OcticonRocket16.png'%}" alt="space" class="space">
+        <h1>PROYECTO NO. 3</h1>
+    </header>
     <div class="xml_tweets">
-        <h2>Envio Xml Mensajes y Configuracion</h2>
         <form action="POST" id="myform" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" name="file" id="file">
-            <button type="button" id="submitButton"> Enviar Archivo </button>
+            <input type="file" name="file" class="form-control" id="file">
+            <button type="button" id="submitButton" class="input-group-text"> <img src="{% static 'MaterialSymbolsSend.png' %}" alt="Enviar Doc" width="25px"> </button>
         </form>
     </div>
-
-    <div id="response">
-        <textarea name="responseTxt" id="responseTxt" cols="100" rows="50" readonly></textarea>
-        <button type="button" id="getResponse"> Archivo salida Tweets</button>
-        <button type="button" id="getConfi">Archivo salida Configuracion</button>
-    </div>
-    <div>
-        <h2> listas(Hashtags, Menciones y Emociones) </h2>
-        <div id="Calendars">
+    <nav class="navBtn">
+        <div class="DocSalida">
+            <button type="button" id="getResponse"> Archivo salida Tweets</button>
+            <button type="button" id="getConfi">Archivo salida Configuracion</button>
+        </div>
+        <div class="Calendars">
             <input type="date" name="dateMin" id="dateMin">
             <input type="date" name="dateMax" id="dateMax">
         </div>
-        <div id="responseList">       
+        <div class="BtnPeticiones">
+            <button type="button" id="getHash">Hashtags</button>
+            <button type="button" id="getUsers">Menciones</button>
+            <button type="button" id="getEmos">Emociones</button>
+            <button type="button" id="clearList"><img src="{% static 'MaterialSymbolsDelete.png' %}" alt="limpiar listas" width="35px"></button>
         </div>
-        <button type="button" id="getHash">Hashtags</button>
-        <button type="button" id="getUsers">Menciones</button>
-        <button type="button">Emociones</button>
-
+    </nav>
+    
+    <div class="container_list">   
+        <div id="responseList"></div>
+        <div id="response">
+            <textarea name="responseTxt" id="responseTxt" cols="100" rows="50" readonly></textarea>
+        </div>
     </div>
+    <footer></footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     
     <script>
         $(document).ready(function(){
@@ -53,7 +63,8 @@
                     processData:false,
                     contentType:false,
                     success:function(response){
-                        $('#response').html(response.message)
+                        // $('#response').html(`${response.message}`)
+                        swal('Error',response.message,'error')
                     },
                     error:function(xhr,status,error){
                         $('#response').html('Error'+ error)
@@ -81,42 +92,44 @@
                 let dateValueMin = $('#dateMin').val()
                 let dateValueMax = $('#dateMax').val() 
                 if(dateValueMin == null || dateValueMin == ''){
-                    alert('Ingrese fecha minima :s')
+                    swal('','Ingrese fecha minima :s','info')
                 }else if(dateValueMax == null || dateValueMax == ''){
-                    alert('ingrese fecha maxima :s')
+                    alert('','ingrese fecha maxima :s','info')
                 } else{
                     url = `/SendXml/ListHash/${dateValueMin}_${dateValueMax}`
                     $.get(url,function(response){
                         if('info' in response){
-                            let padre = document.querySelector("#responseList")
-                            if (padre.hasChildNodes()){
-                                while(padre.firstChild){
-                                    padre.removeChild(padre.firstChild);
+                            if(response.info == 'lista vacia'){
+                                swal('','Ingrese Documentos Xml','warning')
+                            }else{
+                                let padre = document.querySelector("#responseList")
+                                if (padre.hasChildNodes()){
+                                    while(padre.firstChild){
+                                        padre.removeChild(padre.firstChild);
+                                    }
+                                }
+                                for(let i=0;i<response.info.length;i++){
+                                    let divList = document.querySelector("#responseList")
+                                    let li = document.createElement('li')
+                                    li.textContent = response.info[i].fecha
+                                    li.classList.add('liFecha')
+                                    divList.appendChild(li)
+                                    console.log(response.info[i].fecha)
+                                    let hash = response.info[i]
+                                    for (let j=0;j< hash.Hashtags.length;j++){
+                                        console.log(hash.Hashtags[j])
+                                        let divUl = document.createElement('div')
+                                        divUl.classList.add('ulInfo')
+                                        let ulDataHash = document.createElement('ul')
+                                        ulDataHash.textContent =  hash.Hashtags[j].Hashtag
+                                        let ulDatacon = document.createElement('ul')
+                                        ulDatacon.textContent = hash.Hashtags[j].contador
+                                        divUl.appendChild(ulDataHash)
+                                        divUl.appendChild(ulDatacon)
+                                        li.appendChild(divUl)
+                                    }
                                 }
                             }
-                            for(let i=0;i<response.info.length;i++){
-                                let divList = document.querySelector("#responseList")
-                                let li = document.createElement('li')
-                                li.textContent = response.info[i].fecha
-                                li.classList.add('liFecha')
-                                divList.appendChild(li)
-                                console.log(response.info[i].fecha)
-                                let hash = response.info[i]
-                                for (let j=0;j< hash.Hashtags.length;j++){
-                                    console.log(hash.Hashtags[j])
-                                    let divUl = document.createElement('div')
-                                    divUl.classList.add('ulInfo')
-                                    let ulDataHash = document.createElement('ul')
-                                    ulDataHash.textContent =  hash.Hashtags[j].Hashtag
-                                    let ulDatacon = document.createElement('ul')
-                                    ulDatacon.textContent = hash.Hashtags[j].contador
-                                    divUl.appendChild(ulDataHash)
-                                    divUl.appendChild(ulDatacon)
-                                    li.appendChild(divUl)
-                                }
-                            }
-                        }else if('error' in response){
-                            alert('error' + response.error)
                         }
                     })
                 }
@@ -127,15 +140,108 @@
                 let dateValueMin = $('#dateMin').val()
                 let dateValueMax = $('#dateMax').val()
                 if( dateValueMin == "" || dateValueMin == null){
-                    alert('Ingrese Fecha minima de rango')
+                    alert('','Ingrese Fecha minima de rango','info')
                 } else if (dateValueMax == "" || dateValueMax == null){
-                    alert('Ingrese Fecha maxima de rango')
+                    swal('','Ingrese Fecha maxima de rango','info')
                 }else{
                     let url = `/SendXml/ListUsers/${dateValueMin}_${dateValueMax}`
                     $.get(url,function(response){
-                        console.log(response.dateMax)
+                        if('info' in response){
+                            if(response.info == 'lista vacia'){
+                                swal('','Ingrese Documento xml','warning')
+                            } else{
+                                let padre = document.querySelector('#responseList')
+                                if(padre.hasChildNodes){
+                                    while(padre.firstChild){
+                                        padre.removeChild(padre.firstChild)
+                                    }
+                                }
+                                for(let i=0;i<response.info.length;i++){
+                                    console.log(response.info[i].fecha)
+                                    let divList = document.querySelector('#responseList')
+                                    let li = document.createElement('li')
+                                    li.classList.add('liFecha')
+                                    divList.appendChild(li)
+                                    li.textContent = response.info[i].fecha
+                                    let menciones = response.info[i]
+                                    for(let j=0;j<menciones.menciones.length;j++){
+                                        console.log(menciones.menciones[j].contador)
+                                        let divUl = document.createElement('div')
+                                        divUl.classList.add('ulInfo')
+                                        let ulUser = document.createElement('ul')
+                                        ulUser.textContent = menciones.menciones[j].user 
+                                        let ulCont = document.createElement('ul')
+                                        ulCont.textContent = menciones.menciones[j].contador
+                                        divUl.appendChild(ulUser)
+                                        divUl.appendChild(ulCont)
+                                        li.appendChild(divUl)
+                                    }
+                                }
+                            }
+                        }
                     })
                 }
+            })
+            $('#getEmos').click(function(){
+                let dateValueMin = $('#dateMin').val()
+                let dateValueMax = $('#dateMax').val()
+                if(dateValueMin == '' || dateValueMin == null){
+                    swal('','Ingrese fecha minima','info')
+                }else if(dateValueMax == '' || dateValueMax==null){
+                    swal('','Ingrese fecha maxima','info')
+                } else {
+                    let url = `/SendXml/ListEmos/${dateValueMin}_${dateValueMax}`
+                    $.get(url,function(response){
+                        // console.log(response)
+                        if('info' in response){
+                            if(response.info == 'listas vacias (palabras y tweets)'){
+                                swal('','listas vacias (palabras o tweets)','warning')
+                            }else{
+                                let padre = document.querySelector('#responseList')
+                                if(padre.hasChildNodes){
+                                    while(padre.firstChild){
+                                        padre.removeChild(padre.firstChild)
+                                    }
+                                }
+                                for(let i = 0; i < response.info.length; i++){
+                                    console.log(response.info[i])
+                                    DivEm = document.createElement('div')
+                                    DivEm.classList.add('Emos')
+                                    liFecha = document.createElement('li')
+                                    liFecha.textContent = response.info[i].fecha
+                                    ulPositive = document.createElement('ul')
+                                    ulPositive.textContent = `Mensajes Positivas: ${response.info[i].M_positivos}`
+                                    ulNegative = document.createElement('ul')
+                                    ulNegative.textContent = `Mensajes Negativos: ${response.info[i].M_negativos}`
+                                    ulNeutral = document.createElement('ul')
+                                    ulNeutral.textContent = `Mensajes Neutro: ${response.info[i].M_neutros}`
+                                    DivEm.appendChild(liFecha)
+                                    DivEm.appendChild(ulPositive)
+                                    DivEm.appendChild(ulNegative)
+                                    DivEm.appendChild(ulNeutral)
+                                    padre.appendChild(DivEm)
+                                }
+                            }
+
+                        }
+                    })
+                }
+            })
+            $('#clearList').click(function(){
+                url = '/SendXml/ClearList'
+                $.get(url,function(response){
+                    swal('',response.info,"success")
+                    padre = document.querySelector('#responseList')
+                    if(padre.hasChildNodes){
+                        while(padre.firstChild){
+                            padre.removeChild(padre.firstChild)
+                        }
+                    }
+                    txtArea = document.querySelector('#responseTxt')
+                    if(txtArea.value.trim() != ''){
+                        txtArea.value = ''
+                    }
+                })
             })
         })
 
