@@ -7,11 +7,40 @@ h1{
     margin-left:65px ;
 }
 
+.imglink,
+.link{
+    width: 50px;
+    height: 50px;    
+}
+
+.link{
+    margin-top: 5px;
+    margin-right: 10px;
+}
+
+#submitButton{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#submitButton:hover{
+    width: 75px;
+}
+#submitButton:active{
+    background-color: black;
+}
+
 .header{
     border: 1px black solid;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    background-color:black;
+}
+h1{
+    color: white;
+    text-shadow: rgba(255,0,0) 0px 0px 40px;
+
 }
 
 .space{
@@ -26,6 +55,7 @@ h1{
     display: flex;
     justify-content: space-between;
     padding: 10px;
+    background-color: #f8f9fa;
 }
 
 .xml_tweets{
@@ -33,19 +63,20 @@ h1{
     display: flex;
     justify-content: space-around;
     padding: 10px;
+    background-color: #f8f9fa;
 }
 
 .container_list{
-    border: 1px black solid;
-    display:grid;
-    grid-template-columns: 1fr  1fr;
-    width: 100%;
+    display:flex;
+    width: 100vw;
+    height: 100vh;
 }
 
 #responseList{
-    width: 100%;
-    height: 100%;
-    background-color: aqua;
+    width: 50%;
+    height: 1213px;
+    background-color:#52957a;
+    padding: 25px;
 }
 
 #myform{
@@ -53,3 +84,62 @@ h1{
     justify-content: center;
 }
 
+.BtnPeticiones{
+    display: flex;
+    justify-content: center;
+    flex-basis: auto;
+}
+#dateMin,
+#dateMax{
+    height: 40px;
+    margin: 3px;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+.Calendars{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#getResponse,
+#getConfi,
+#getHash,
+#getUsers,
+#getEmos,
+#clearList{
+    height: 50px;
+    margin: 2px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+.liFecha{
+    background-color: bisque;
+}
+
+#responseTxt{
+    background-color: #343541;
+    font-style: normal;
+    color: wheat;
+    padding: 5px;
+    width: 100%;
+}
+#response{
+    background-color: #343541;
+    width: 50%;
+    margin: 0px;
+    padding: 0%;
+}
+#clearList:active{
+    background:#beb6b6;
+}
+
+#getResponse:active,
+#getConfi:active,
+#getHash:active,
+#getUsers:active,
+#getEmos:active{
+    background: #343541;
+    color: #beb6b6;
+}

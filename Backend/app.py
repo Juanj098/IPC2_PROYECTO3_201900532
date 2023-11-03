@@ -488,5 +488,18 @@ def resumenEmos():
     else:
         return jsonify({'info':'ingrese doc. XML emociones'}) 
 
+
+# @app.route('search/emociones/<string:emocion>', methods = ['GET'])
+# def searchEmo(emocion):
+#     pass
+
+# @app.route('search/user/<string:user>', methods = ['GET'])
+# def searchUser(user):
+#     pass
+
+# @app.route('search/Hash/<string:hashtag>', methods = ['GET'])p
+# def searchHash(Hashtag):
+#     pass
+
 if __name__ == '__main__':
     app.run(debug = True,port = 4000)

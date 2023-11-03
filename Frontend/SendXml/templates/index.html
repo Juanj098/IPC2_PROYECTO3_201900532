@@ -10,8 +10,12 @@
 </head>
 <body>
     <header class="header">
-        <img src="{% static 'OcticonRocket16.png'%}" alt="space" class="space">
+        <img src="{% static 'planet-star.gif'%}" alt="space" class="space">
         <h1>PROYECTO NO. 3</h1>
+        <div class="alink">
+            <a class="link" href="https://drive.google.com/file/d/1q7SS0gdcJjFEoEi-8axIwTRhAC1h0Muh/view?usp=sharing" target="_blank"><img  class="imglink" src="{% static 'MdiBadgeAccount.png' %}" alt="Documentacion"></a>
+            <a class="link" href="https://drive.google.com/file/d/1uZIV9mdYTgp2c2VpHmmJTaStn6gX6Crs/view?usp=sharing" target="_blank"><img  class="imglink" src="{% static 'CarbonDocumentAttachment (1).png' %}" alt="Documentacion"></a>
+        </div>
     </header>
     <div class="xml_tweets">
         <form action="POST" id="myform" enctype="multipart/form-data">
@@ -27,23 +31,24 @@
         </div>
         <div class="Calendars">
             <input type="date" name="dateMin" id="dateMin">
+            <label for="Calendars"> - </label>
             <input type="date" name="dateMax" id="dateMax">
         </div>
         <div class="BtnPeticiones">
             <button type="button" id="getHash">Hashtags</button>
             <button type="button" id="getUsers">Menciones</button>
             <button type="button" id="getEmos">Emociones</button>
-            <button type="button" id="clearList"><img src="{% static 'MaterialSymbolsDelete.png' %}" alt="limpiar listas" width="35px"></button>
+            <button type="button" id="clearList"><img id="imgClear" src="{% static 'MaterialSymbolsDelete.png' %}" alt="limpiar listas" width="35px"></button>
         </div>
     </nav>
     
     <div class="container_list">   
-        <div id="responseList"></div>
+        <div id="responseList">
+        </div>
         <div id="response">
             <textarea name="responseTxt" id="responseTxt" cols="100" rows="50" readonly></textarea>
         </div>
     </div>
-    <footer></footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     
@@ -113,20 +118,32 @@
                                     let li = document.createElement('li')
                                     li.textContent = response.info[i].fecha
                                     li.classList.add('liFecha')
+                                    li.style.paddingRight = '10px'
                                     divList.appendChild(li)
                                     console.log(response.info[i].fecha)
                                     let hash = response.info[i]
+                                    let table = document.createElement('table')
+                                    divList.appendChild(table)
+                                    table.classList.add('tableInfo')
+                                    table.style.border = '2px black solid'
+                                    table.style.margin = '5px'
+                                    table.style.width = '500px'
                                     for (let j=0;j< hash.Hashtags.length;j++){
                                         console.log(hash.Hashtags[j])
-                                        let divUl = document.createElement('div')
-                                        divUl.classList.add('ulInfo')
-                                        let ulDataHash = document.createElement('ul')
-                                        ulDataHash.textContent =  hash.Hashtags[j].Hashtag
-                                        let ulDatacon = document.createElement('ul')
-                                        ulDatacon.textContent = hash.Hashtags[j].contador
-                                        divUl.appendChild(ulDataHash)
-                                        divUl.appendChild(ulDatacon)
-                                        li.appendChild(divUl)
+                                        let tr = document.createElement('tr')
+                                        tr.style.border = '1px black solid'
+                                        let tdDataHash = document.createElement('td')
+                                        tdDataHash.textContent = `Hashtag: ${hash.Hashtags[j].Hashtag}`
+                                        tdDataHash.style.border = '1px black solid'
+                                        tdDataHash.style.padding = '3px'
+                                        tdDataHash.style.width = '250px'
+                                        let tdDatacon = document.createElement('td')
+                                        tdDatacon.textContent = `Contador: ${hash.Hashtags[j].contador}`
+                                        tdDatacon.style.border = '1px black solid'
+                                        tdDatacon.style.padding = '3px'
+                                        table.appendChild(tr)
+                                        tr.appendChild(tdDataHash)
+                                        tr.appendChild(tdDatacon)
                                     }
                                 }
                             }
@@ -140,7 +157,7 @@
                 let dateValueMin = $('#dateMin').val()
                 let dateValueMax = $('#dateMax').val()
                 if( dateValueMin == "" || dateValueMin == null){
-                    alert('','Ingrese Fecha minima de rango','info')
+                    swal('','Ingrese Fecha minima de rango','info')
                 } else if (dateValueMax == "" || dateValueMax == null){
                     swal('','Ingrese Fecha maxima de rango','info')
                 }else{
@@ -162,19 +179,29 @@
                                     let li = document.createElement('li')
                                     li.classList.add('liFecha')
                                     divList.appendChild(li)
+                                    let table = document.createElement('table')
+                                    table.style.border = '2px black solid'
+                                    table.style.margin = '5px'
+                                    table.style.width = '500px'
+                                    divList.appendChild(table)
                                     li.textContent = response.info[i].fecha
                                     let menciones = response.info[i]
                                     for(let j=0;j<menciones.menciones.length;j++){
                                         console.log(menciones.menciones[j].contador)
-                                        let divUl = document.createElement('div')
-                                        divUl.classList.add('ulInfo')
-                                        let ulUser = document.createElement('ul')
-                                        ulUser.textContent = menciones.menciones[j].user 
-                                        let ulCont = document.createElement('ul')
-                                        ulCont.textContent = menciones.menciones[j].contador
-                                        divUl.appendChild(ulUser)
-                                        divUl.appendChild(ulCont)
-                                        li.appendChild(divUl)
+                                        tr = document.createElement('tr')
+                                        tr.style.border = '1px black solid'
+                                        let tdUser = document.createElement('td')
+                                        tdUser.textContent = `Usuario: ${menciones.menciones[j].user}` 
+                                        tdUser.style.border = '1px black solid'
+                                        tdUser.style.width = '250px'
+                                        tdUser.style.padding = '3px'
+                                        let tdCont = document.createElement('td')
+                                        tdCont.textContent = `Contador: ${menciones.menciones[j].contador}`
+                                        tdCont.style.border = '1px black solid'
+                                        tdCont.style.padding = '3px'
+                                        tr.appendChild(tdUser)
+                                        tr.appendChild(tdCont)
+                                        table.appendChild(tr)
                                     }
                                 }
                             }
@@ -205,21 +232,31 @@
                                 }
                                 for(let i = 0; i < response.info.length; i++){
                                     console.log(response.info[i])
-                                    DivEm = document.createElement('div')
-                                    DivEm.classList.add('Emos')
                                     liFecha = document.createElement('li')
+                                    liFecha.classList.add('liFecha')
                                     liFecha.textContent = response.info[i].fecha
-                                    ulPositive = document.createElement('ul')
-                                    ulPositive.textContent = `Mensajes Positivas: ${response.info[i].M_positivos}`
-                                    ulNegative = document.createElement('ul')
-                                    ulNegative.textContent = `Mensajes Negativos: ${response.info[i].M_negativos}`
-                                    ulNeutral = document.createElement('ul')
-                                    ulNeutral.textContent = `Mensajes Neutro: ${response.info[i].M_neutros}`
-                                    DivEm.appendChild(liFecha)
-                                    DivEm.appendChild(ulPositive)
-                                    DivEm.appendChild(ulNegative)
-                                    DivEm.appendChild(ulNeutral)
-                                    padre.appendChild(DivEm)
+                                    let table = document.createElement('table')
+                                    table.style.border = '2px black solid'
+                                    table.style.margin = '5px'
+                                    table.style.width = '300px'
+                                    let tr = document.createComment('tr')
+                                    let trPositive = document.createElement('tr')
+                                    trPositive.style.border = '1px black solid'
+                                    trPositive.style.padding = '3px'
+                                    trPositive.textContent = `Mensajes Positivas: ${response.info[i].M_positivos}`
+                                    let trNegative = document.createElement('tr')
+                                    trNegative.style.border = '1px black solid'
+                                    trNegative.style.padding = '3px'
+                                    trNegative.textContent = `Mensajes Negativos: ${response.info[i].M_negativos}`
+                                    let trNeutral = document.createElement('tr')
+                                    trNeutral.textContent = `Mensajes Neutro: ${response.info[i].M_neutros}`
+                                    trNeutral.style.border = '1px black solid'
+                                    trNeutral.style.padding = '3px'
+                                    table.appendChild(trPositive)
+                                    table.appendChild(trNegative)
+                                    table.appendChild(trNeutral)
+                                    padre.appendChild(liFecha)
+                                    padre.appendChild(table)
                                 }
                             }
 
